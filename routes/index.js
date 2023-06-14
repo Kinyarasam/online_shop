@@ -2,7 +2,7 @@ import express from 'express';
 import AppController from '../controller/Appcontroller';
 import UsersController from '../controller/UsersController';
 import AuthController from '../controller/AuthController';
-import FileController from '../controller/FileController';
+import FilesController from '../controller/FilesController';
 
 const router = express.Router();
 
@@ -18,6 +18,6 @@ router.get('/users/me', UsersController.getMe);
 router.get('/disconnect', AuthController.getDisconnect);
 
 /* First file */
-router.post('/files', FileController.postUpload);
+router.post('/files', FilesController.postUpload);
 
 export default router;
