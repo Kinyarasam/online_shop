@@ -71,7 +71,6 @@ export default class FilesController {
           try {
             fs.mkdir(filePath, (err) => {
               if (err) throw err;
-
               // console.log('Created Successfully');
             });
           } catch (err) {
@@ -161,5 +160,57 @@ export default class FilesController {
         });
       });
     });
+  }
+
+  /**
+   * Retrieve user file documents for a specific parentId
+   * and with pagination
+   * @param {*} req 
+   * @param {*} res 
+   */
+  static async getIndex(req, res) {
+    const token = req.header('X-Token');
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+    
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    
+    const idObject = new ObjectID(userId);
+    const users = await dbClient.db.collection('users');
+    return users.find({ _id: idObject }, async (err, user) => {
+      if (err) throw err;
+      
+      if (!user) return res.status(401).json({ error: 'Unauthorized' });
+      
+      const { parentId, page } = req.query;
+      console.log(parentId, page)
+      const files = await dbClient.db.collection('files');
+      return files
+        .find({userId})
+        .limit(20)
+        .toArray((err, doc) => {
+            if (err) throw err;
+
+            return res.status(201).json(doc.map((a) => {
+              const result = {
+                id: a['_id'],
+                userId: a['userId'],
+                name: a['name'],
+                type: a['type'],
+                isPublic: a['isPublic'],
+                parentId: a['parentId'],
+              }
+              return result;
+            }))
+          });
+    });
+  };
+    
+  /**
+   * Retrieve the file and documents based on the id.
+   * @param {*} req 
+   * @param {*} res 
+  */
+  static async getShow(req, res) {
   }
 }

@@ -20,4 +20,8 @@ router.get('/disconnect', AuthController.getDisconnect);
 /* First file */
 router.post('/files', FilesController.postUpload);
 
+/* Get and list file */
+router.get('/files', FilesController.getIndex);
+router.get('/files/:id', FilesController.getShow);
+
 export default router;
