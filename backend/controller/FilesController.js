@@ -181,28 +181,59 @@ export default class FilesController {
       if (err) throw err;
       
       if (!user) return res.status(401).json({ error: 'Unauthorized' });
-      
-      const { parentId, page } = req.query;
-      console.log(parentId, page)
-      const files = await dbClient.db.collection('files');
-      return files
-        .find({userId})
-        .limit(20)
-        .toArray((err, doc) => {
-            if (err) throw err;
 
-            return res.status(201).json(doc.map((a) => {
-              const result = {
-                id: a['_id'],
-                userId: a['userId'],
-                name: a['name'],
-                type: a['type'],
-                isPublic: a['isPublic'],
-                parentId: a['parentId'],
-              }
-              return result;
-            }))
-          });
+      const { parentId, page } = req.query;
+      
+      /* Build the aggregation pipeline for filtering and pagination */
+      const pipeline = [];
+
+      /* match stage to filtering based on the parentId */
+      if (parentId) pipeline.push({ $match: { parentId } });
+
+      /* Sort by document properties if needed */
+      pipeline.push({ $sort: { name: 1 } });
+
+      /* pagination using skip and limit */
+      const pageSize = 20;
+      const pageNumber = parseInt(page) || 0;
+      const skip = pageNumber * pageSize;
+      pipeline.push({ $skip: skip });
+      pipeline.push({ $limit: pageSize });
+
+      /* Execute the aggregation pipeline on the files collections */
+      dbClient.db.collection('files')
+        .aggregate(pipeline)
+        .toArray((err, docs) => {
+          if (err) return res.status(500).json({ error: err });
+
+          return res.status(201).json(docs.map((doc) => ({
+            id: doc._id,
+            userId: doc.userId,
+            name: doc.name,
+            type: doc.type,
+            isPublic: doc.isPublic,
+            parentId: doc.parentId,
+          })));
+        });
+      // const files = await dbClient.db.collection('files');
+      // return files
+      //   .find({userId})
+      //   .limit(20)
+      //   .toArray((err, doc) => {
+      //       if (err) throw err;
+
+      //       return res.status(201).json(doc.map((a) => {
+      //         const result = {
+      //           id: a['_id'],
+      //           userId: a['userId'],
+      //           name: a['name'],
+      //           type: a['type'],
+      //           isPublic: a['isPublic'],
+      //           parentId: a['parentId'],
+      //         }
+      //         return result;
+      //       }))
+      //     });
     });
   };
     
