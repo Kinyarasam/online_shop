@@ -243,5 +243,37 @@ export default class FilesController {
    * @param {*} res 
   */
   static async getShow(req, res) {
+    const token = req.header('X-Token');
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+
+    if (!userId) return res.status(401).json({ error: 'Unauthenticated' });
+
+    const users = await dbClient.db.collection('users');
+    const idObject = new ObjectID(userId);
+    return users.findOne({ _id: idObject }, async (err, user) => {
+      if (err) return res.status(500).json({ error: err });
+
+      if (!user) return res.status(401).json({ error: 'Unauthenticated' })
+
+      const fileId = (req.url.toString().split('/')).pop();
+      const idObject = new ObjectID(fileId);
+
+      const files = await dbClient.db.collection('files');
+      return files.findOne({ _id: idObject, userId: userId }, (err, file) => {
+        if (err) return res.status(500).json({ error: err });
+
+        if (!file) return res.status(404).json({ error: 'Not found' });
+
+        return res.json({
+          id: file._id,
+          userId: file.userId,
+          name: file.name,
+          type: file.type,
+          isPublic: file.isPublic,
+          parentId: file.parentId,
+        });
+      })
+    });
   }
 }
