@@ -12,12 +12,13 @@ const usersQueue = new Queue(
 
 export default class UsersController{
   /**
-   * 
+   * Create a new User.
    * @param {*} req 
    * @param {*} res 
    * @returns 
    */
   static postNew(req, res) {
+    console.log('hit')
     const { email } = req.body;
     const { password } = req.body;
 
