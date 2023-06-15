@@ -276,4 +276,90 @@ export default class FilesController {
       })
     });
   }
+
+  /**
+   * 
+   * @param {*} req 
+   * @param {*} res 
+   * @returns 
+   */
+  static async putPublish(req, res) {
+    const token = req.header('X-Token');
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+
+    if (!userId) return res.status(401).json({ error: 'Unauthenticated' });
+
+    const users = await dbClient.db.collection('users');
+    const idObject = new ObjectID(userId);
+    return users.findOne({ _id: idObject }, async (err, user) => {
+      if (err) return res.status(500).json({ error: err });
+
+      if (!user) return res.status(401).json({ error: 'Unauthenticated' })
+
+      const fileId = (req.url.toString().split('/'))[2];
+
+      const idObject = new ObjectID(fileId);
+      const files = await dbClient.db.collection('files');
+      return files
+        .findOneAndUpdate(
+          { _id: idObject, userId: userId },
+          { $set: { isPublic: true } }, 
+          { returnOriginal: false },
+          (err, file) => {
+            if (err) return res.status(500).json({ error: err });
+
+            if (!file) return res.status(404).json({ error: 'Not Found' });
+
+            return res.status(200).json({
+              id: file.value._id,
+              userId: file.value.userId,
+              name: file.value.name,
+              type: file.value.type,
+              isPublic: file.value.isPublic,
+              parentId: file.value.parentId,
+          });
+      });
+    });
+  }
+
+  static async putUnpublish(req, res) {
+    const token = req.header('X-Token');
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+
+    if (!userId) return res.status(401).json({ error: 'Unauthenticated' });
+
+    const users = await dbClient.db.collection('users');
+    const idObject = new ObjectID(userId);
+    return users.findOne({ _id: idObject }, async (err, user) => {
+      if (err) return res.status(500).json({ error: err });
+
+      if (!user) return res.status(401).json({ error: 'Unauthenticated' })
+
+      const fileId = (req.url.toString().split('/'))[2];
+
+      const idObject = new ObjectID(fileId);
+      const files = await dbClient.db.collection('files');
+      return files
+        .findOneAndUpdate(
+          { _id: idObject, userId: userId },
+          { $set: { isPublic: false } },
+          { returnOriginal: false },
+          (err, file) => {
+            if (err) return res.status(500).json({ error: err });
+
+            if (!file) return res.status(404).json({ error: 'Not Found' });
+
+            return res.status(200).json({
+              id: file.value._id,
+              userId: file.value.userId,
+              name: file.value.name,
+              type: file.value.type,
+              isPublic: file.value.isPublic,
+              parentId: file.value.parentId,
+            });
+      });
+    });
+  }
 }
