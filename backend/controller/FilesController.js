@@ -4,7 +4,7 @@ import { Buffer } from 'buffer';
 import { v4 as uuidv4 } from 'uuid';
 import Queue from 'bull';
 import dotenv from 'dotenv';
-import fs from 'fs';
+import fs, { fstatSync } from 'fs';
 import dbClient from "../utils/db";
 import redisClient from "../utils/redis";
 
@@ -278,7 +278,7 @@ export default class FilesController {
   }
 
   /**
-   * 
+   * Set the isPublic file attribute to true
    * @param {*} req 
    * @param {*} res 
    * @returns 
@@ -287,42 +287,50 @@ export default class FilesController {
     const token = req.header('X-Token');
     const key = `auth_${token}`;
     const userId = await redisClient.get(key);
-
+    
     if (!userId) return res.status(401).json({ error: 'Unauthenticated' });
-
+    
     const users = await dbClient.db.collection('users');
     const idObject = new ObjectID(userId);
     return users.findOne({ _id: idObject }, async (err, user) => {
       if (err) return res.status(500).json({ error: err });
-
+      
       if (!user) return res.status(401).json({ error: 'Unauthenticated' })
-
+      
       const fileId = (req.url.toString().split('/'))[2];
-
+      
       const idObject = new ObjectID(fileId);
       const files = await dbClient.db.collection('files');
       return files
-        .findOneAndUpdate(
-          { _id: idObject, userId: userId },
-          { $set: { isPublic: true } }, 
-          { returnOriginal: false },
-          (err, file) => {
-            if (err) return res.status(500).json({ error: err });
+      .findOneAndUpdate(
+        { _id: idObject, userId: userId },
+        { $set: { isPublic: true } }, 
+        { returnOriginal: true },
+        (err, file) => {
+          if (err) return res.status(500).json({ error: err });
+          
+          if (!file) return res.status(404).json({ error: 'Not Found' });
+          
+          if (file.value === null) return res.status(404).json({ error: 'Not Found' });
 
-            if (!file) return res.status(404).json({ error: 'Not Found' });
-
-            return res.status(200).json({
-              id: file.value._id,
-              userId: file.value.userId,
-              name: file.value.name,
-              type: file.value.type,
-              isPublic: file.value.isPublic,
-              parentId: file.value.parentId,
+          return res.status(200).json({
+            id: file.value._id,
+            userId: file.value.userId,
+            name: file.value.name,
+            type: file.value.type,
+            isPublic: file.value.isPublic,
+            parentId: file.value.parentId,
           });
       });
     });
   }
 
+  /**
+   * Set the isPublic attribute to false.
+   * @param {*} req 
+   * @param {*} res 
+   * @returns 
+   */
   static async putUnpublish(req, res) {
     const token = req.header('X-Token');
     const key = `auth_${token}`;
@@ -341,6 +349,10 @@ export default class FilesController {
 
       const idObject = new ObjectID(fileId);
       const files = await dbClient.db.collection('files');
+      // return res.json({
+      //   userId: userId,
+      //   fileId: fileId
+      // })
       return files
         .findOneAndUpdate(
           { _id: idObject, userId: userId },
@@ -351,6 +363,9 @@ export default class FilesController {
 
             if (!file) return res.status(404).json({ error: 'Not Found' });
 
+            if (file.value === null) return res.status(404).json({ error: 'Not Found' });
+
+            // return res.json(file)
             return res.status(200).json({
               id: file.value._id,
               userId: file.value.userId,
@@ -361,5 +376,52 @@ export default class FilesController {
             });
       });
     });
+  }
+
+  /**
+   * Get the content of a file based on the id.
+   * @param {*} req 
+   * @param {*} res 
+   * @returns 
+   */
+  static async getFile(req, res) {
+    const token = req.header('X-Token');
+    const key = `auth_${token}`;
+    const { id } = req.params;
+    const userId = await redisClient.get(key);
+    const idObject = new ObjectID(id);
+    const files = await dbClient.db.collection('files');
+
+    return files
+      .findOne({ _id: idObject }, (err, file) => {
+        if (err) return res.status(500).json({ error: 'err' });
+
+        if (!file) return res.status(404).json({ error: 'Not found' });
+
+        const idObject = new ObjectID(userId);
+
+        if (file.type == 'folder' || file.type == 'file') {
+          if (file.isPublic == false || file.userId !== userId) {
+            return res.status(404).json({ error: 'Not found' });
+          }
+
+          if (file.type == 'folder') return res.status(400).json({ error: "A folder doesn't have content" });
+
+          const isAvailableLocally = (filePath) => {
+            return fs.existsSync(filePath, (err, result) => {
+              if (err) return err;
+
+              return (result)
+            });
+          };
+
+          console.log(file.localPath)
+          console.log(isAvailableLocally(file.localPath))
+
+
+          return res.json(isAvailableLocally(file.localPath));
+        }
+        return res.json({ msg: 'file is a photo' });
+      })
   }
 }
