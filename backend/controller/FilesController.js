@@ -2,6 +2,7 @@
 import { ObjectID } from 'mongodb';
 import { Buffer } from 'buffer';
 import { v4 as uuidv4 } from 'uuid';
+import mime from 'mime-types';
 import Queue from 'bull';
 import dotenv from 'dotenv';
 import fs, { fstatSync } from 'fs';
@@ -201,7 +202,7 @@ export default class FilesController {
       pipeline.push({ $limit: pageSize });
 
       /* Execute the aggregation pipeline on the files collections */
-      dbClient.db.collection('files')
+      return dbClient.db.collection('files')
         .aggregate(pipeline)
         .toArray((err, docs) => {
           if (err) return res.status(500).json({ error: err });
@@ -256,8 +257,8 @@ export default class FilesController {
 
       if (!user) return res.status(401).json({ error: 'Unauthenticated' })
 
-      const fileId = (req.url.toString().split('/')).pop();
-      const idObject = new ObjectID(fileId);
+      const { id } = req.params;  // (req.url.toString().split('/')).pop();
+      const idObject = new ObjectID(id);
 
       const files = await dbClient.db.collection('files');
       return files.findOne({ _id: idObject, userId: userId }, (err, file) => {
@@ -305,7 +306,7 @@ export default class FilesController {
       .findOneAndUpdate(
         { _id: idObject, userId: userId },
         { $set: { isPublic: true } }, 
-        { returnOriginal: true },
+        { returnOriginal: false },
         (err, file) => {
           if (err) return res.status(500).json({ error: err });
           
@@ -400,28 +401,35 @@ export default class FilesController {
 
         const idObject = new ObjectID(userId);
 
-        if (file.type == 'folder' || file.type == 'file') {
-          if (file.isPublic == false || file.userId !== userId) {
-            return res.status(404).json({ error: 'Not found' });
-          }
-
-          if (file.type == 'folder') return res.status(400).json({ error: "A folder doesn't have content" });
-
-          const isAvailableLocally = (filePath) => {
-            return fs.existsSync(filePath, (err, result) => {
-              if (err) return err;
-
-              return (result)
-            });
-          };
-
-          console.log(file.localPath)
-          console.log(isAvailableLocally(file.localPath))
-
-
-          return res.json(isAvailableLocally(file.localPath));
+        // if (file.type == 'folder' || file.type == 'file') {
+        if (file.isPublic == false || file.userId !== userId) {
+          return res.status(404).json({ error: 'Not found' });
         }
-        return res.json({ msg: 'file is a photo' });
+
+        if (file.type == 'folder') return res.status(400).json({ error: "A folder doesn't have content" });
+
+        /**
+         * Checks if the file is available locally.
+         * @param {*} filePath 
+         * @returns {boolean}
+         */
+        const isAvailableLocally = (filePath) => {
+          return fs.existsSync(filePath, (err) => {
+            if (err) return false;
+
+            return true
+          });
+        };
+
+        const isAvailable = isAvailableLocally(file.localPath)
+
+        if (!isAvailable) return res.status(404).json({ error: 'Not found' });
+
+        const resHeader = mime.lookup(file.name);
+        return res
+          .status(200)
+          .header('Content-Type', resHeader)
+          .sendFile(file.localPath)
       })
   }
 }
