@@ -17,6 +17,8 @@ export const Login = (props) => {
     const userData = `${email}:${password}`;
     const encodedData = btoa(userData);
 
+    // console.log(encoded
+
     try {
       const response = await fetch('http://localhost:5000/connect', {
         method: 'GET',

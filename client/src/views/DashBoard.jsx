@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import NavBar from "./header";
 
 const AnalyticsCard = ({ title, value, route }) => {
   return (
@@ -17,6 +18,29 @@ const DashBoard = () => {
   const [name, setName] = useState('');
   const [id, setId] = useState('');
   const [email, setEmail] = useState('');
+
+  /* Reports */
+  const [noUsers, setUserno] = useState('')
+  const [noProducts, setProductsno] = useState('')
+  const [noOrders, setOrderno] = useState('')
+
+  useEffect(() => {
+    const getRecords = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/stats');
+        const record = await response.json()
+
+        noUsers = setUserno(record.users)
+        noProducts = setProductsno(record.products)
+        noOrders = setOrderno(record.orders)
+
+      } catch (err) {
+        /* Some Error */
+      }
+    };
+
+    getRecords();
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -47,15 +71,15 @@ const DashBoard = () => {
     <div className="App">
       <div>
         <div>
-          <h1>header</h1>
+          <NavBar />
         </div>
-        <div className="auth-form-container">
+        <div className="dashboard-container">
           <h3>DashBoard</h3>
           <div>Welcome {email ? email : "guest. Please login to view content"}.</div>
           <div className="analytics-card-container">
-            <AnalyticsCard title='Users' value='1000' route='/users/' />
-            <AnalyticsCard title='Products' value='26' route='/products/' />
-            <AnalyticsCard title='Orders' value='5000' route='/orders/' />
+            <AnalyticsCard title='Users' value={noUsers || 0} route='/users/' />
+            <AnalyticsCard title='Products' value={noProducts || 0} route='/products/' />
+            <AnalyticsCard title='Orders' value={noOrders || 0} route='/orders/' />
           </div>
         </div>
         <div>footer</div>
