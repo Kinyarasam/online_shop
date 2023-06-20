@@ -8,10 +8,31 @@ export const Register = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(email, password);
+
+    console.log('--try saving--');
+    
+    fetch('http://localhost:5000/users/', {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        Accept: 'Application.json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+        name: name,
+      })
+    })
+      .then((res) => console.log(res))
+      .then((data => console.log(data)))
+      .catch((err) => console.log(err))
   };
+
 
   return (
     <div className="auth-form-container">
+      <h1>Register</h1>
       <form
         className="register-form"
         onSubmit={handleSubmit}
@@ -45,13 +66,14 @@ export const Register = (props) => {
           id="password"
           name="password"
         />
-      </form>
 
-      <button
-        type="submit"
-      >
-        Register
-      </button>
+        <button
+          // onClick={handleSubmit}
+          type="submit"
+          >
+          Register
+        </button>
+      </form>
 
       <button
         onClick={() => props.onFormSwitch('login')}

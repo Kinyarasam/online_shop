@@ -51,3 +51,22 @@ button {
   color: white;
   text-decoration: underline;
 }
+
+.analytics-card-container {
+  display: flex;
+  flex-direction: row;
+  min-width: 60vh;
+}
+
+.analytics-card {
+  cursor: pointer;
+  background-color: #c3f0f7a9;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 1rem;
+  box-shadow: #868383;
+}
+
+.analytics-card p :hover{
+  text-decoration: underline;
+}
