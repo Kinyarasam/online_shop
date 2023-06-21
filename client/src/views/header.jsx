@@ -53,9 +53,7 @@ const NavBar = () => {
               <li>
                 <Link to='/profile'>Profile</Link>
               </li>
-              <li
-                // onClick={handleLogout}
-              >
+              <li>
                 <Link to='/logout'>logout</Link>
               </li>
             </> : <>

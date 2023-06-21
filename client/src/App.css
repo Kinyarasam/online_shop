@@ -105,3 +105,39 @@ button {
 .analytics-card p :hover{
   text-decoration: underline;
 }
+
+.user-profile-container {
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  color: black;
+  padding: 1rem;
+  border-radius: 10px;
+  justify-content: space-around;
+
+}
+
+.profile-container {
+  margin-left: 5px;
+  margin-right: 5px
+}
+
+.photo-container {
+  background-color: crimson;
+  border-radius: 100%;
+  min-width: 15rem;
+  min-height: 15rem;
+  display: flex;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-container {
+  width: fit-content;
+}
+
+.profile-information {
+  display: flex;
+  flex-direction: column;
+}
