@@ -23,12 +23,9 @@ const NavBar = () => {
           mode: 'cors'
         });
         const data = await response.json();
-        // console.log(data)
         setToken(authToken)
-        // const activeUser = Boolean
         return data.error ? false : true;
 
-        // return activeUser;
       } catch (err) {
         return false;
       }

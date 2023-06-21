@@ -29,37 +29,6 @@ const Logout = () => {
       setName(null);
       navigate('/')
     };
-    // const disconnectUser = async () => {
-    //   try {
-    //     const AuthenticatedUser = localStorage.getItem('token');
-    //     console.log(AuthenticatedUser);
-
-    //     const response = await fetch('http://localhost:5000/disconnect', {
-    //       method: 'GET',
-    //       headers: {
-    //         'X-Token': AuthenticatedUser
-    //       },
-    //       mode: 'cors'
-    //     })
-    //     const data = await response.json()
-    //     console.log(data || 'no data')
-    //     // setToken(data)
-    //     if (AuthenticatedUser) {
-    //       localStorage.removeItem('token')
-    //       setToken(token)
-    //     } else {
-    //       console.log('Not authenticated')
-    //     }
-    //   } catch (err) {
-    //     console.log(err);
-    //     navigate('/')
-    //   }
-
-    //   console.log(token);
-
-      // navigate('/auth')
-    // };
-    // console.log(token)
 
     handleLogout();
   }, []);
