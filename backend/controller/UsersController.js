@@ -19,8 +19,11 @@ export default class UsersController{
    */
   static postNew(req, res) {
     console.log('hit')
+    // console.log(req)
     const { email } = req.body;
     const { password } = req.body;
+
+    console.log(email, password)
 
     if (!email) {
       return res.status(400).json({ error: 'Missing email' });
@@ -43,6 +46,8 @@ export default class UsersController{
       /* Save the new User. */
       return users.insertOne({ email, password: hashedPassword }, (err, result) => {
         if (err) throw err;
+
+        console.log(result);
 
         usersQueue.add({ userId: result.insertedId });
         return res.status(201).json({

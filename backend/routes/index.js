@@ -1,8 +1,10 @@
+#!/usr/bin/env node
 import express from 'express';
 import AppController from '../controller/Appcontroller';
 import UsersController from '../controller/UsersController';
 import AuthController from '../controller/AuthController';
 import FilesController from '../controller/FilesController';
+import ProductsController from '../controller/ProductsController';
 
 const router = express.Router();
 
@@ -31,5 +33,9 @@ router
 
 /* file data */
 router.get('/files/:id/data', FilesController.getFile);
+
+/* Create a new product */
+router.post('/products', ProductsController.postNew)
+    .get('/products', ProductsController.getIndex);
 
 export default router;
