@@ -20,15 +20,16 @@ const DashBoard = () => {
   const [email, setEmail] = useState('');
 
   /* Reports */
-  const [noUsers, setUserno] = useState('')
-  const [noProducts, setProductsno] = useState('')
-  const [noOrders, setOrderno] = useState('')
+  let [noUsers, setUserno] = useState(0)
+  let [noProducts, setProductsno] = useState(0)
+  let [noOrders, setOrderno] = useState(0)
 
   useEffect(() => {
     const getRecords = async () => {
       try {
         const response = await fetch('http://localhost:5000/stats');
         const record = await response.json()
+        console.log(record);
 
         noUsers = setUserno(record.users)
         noProducts = setProductsno(record.products)
@@ -39,6 +40,7 @@ const DashBoard = () => {
       }
     };
 
+    console.log(noUsers, noProducts)
     getRecords();
   }, []);
 
@@ -78,7 +80,7 @@ const DashBoard = () => {
           <div>Welcome {email ? email : "guest. Please login to view content"}.</div>
           <div className="analytics-card-container">
             <AnalyticsCard title='Users' value={noUsers || 0} route='/users/' />
-            <AnalyticsCard title='Products' value={noProducts || 0} route='/products/' />
+            <AnalyticsCard title='Products' value={noProducts} route='/products/' />
             <AnalyticsCard title='Orders' value={noOrders || 0} route='/orders/' />
           </div>
         </div>

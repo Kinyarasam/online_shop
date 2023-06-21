@@ -35,6 +35,8 @@ const NavBar = () => {
       .then(res => setIsLoggedIn(res))
   }, []);
 
+  if (loggedIn === false) navigate('/auth');
+
   return (
     <header className="navbar">
       <div className="logo-container">
