@@ -5,12 +5,13 @@ import { v4 as uuidv4 } from 'uuid';
 import mime from 'mime-types';
 import Queue from 'bull';
 import dotenv from 'dotenv';
-import fs, { fstatSync } from 'fs';
+import fs from 'fs';
 import dbClient from "../utils/db";
 import redisClient from "../utils/redis";
 
 dotenv.config();  /* Load the environment variables */
 
+/* Create the fileQueue */
 const filesQueue = new Queue(
   'fileQueue',
   'redis://localhost:6379',
@@ -430,6 +431,6 @@ export default class FilesController {
           .status(200)
           .header('Content-Type', resHeader)
           .sendFile(file.localPath)
-      })
+      });
   }
 }
