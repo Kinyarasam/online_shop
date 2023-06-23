@@ -3,8 +3,8 @@ import NotFound from "../views/NotFound";
 import UserProfile from '../views/UserProfile';
 import Logout from '../views/Logout';
 import UsersViews from "../views/users";
-
-// const token = localStorage.getItem(token);
+import ProductsViews from '../views/productViews';
+import OrdersView from '../views/ordersViews.jsx';
 
 const nav = [
   {
@@ -29,12 +29,12 @@ const nav = [
   },
   {
     path: '/products',
-    element: <>Products Info</>,
+    element: < ProductsViews />,
     errorElement: < NotFound />
   },
   {
     path: '/orders',
-    element: <>Orders Info</>,
+    element: < OrdersView />,
     errorElement: < NotFound />
   }
 ];

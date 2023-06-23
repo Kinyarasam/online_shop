@@ -79,9 +79,21 @@ const DashBoard = () => {
           <h3>DashBoard</h3>
           <div>Welcome {email ? email : "guest. Please login to view content"}.</div>
           <div className="analytics-card-container">
-            <AnalyticsCard title='Users' value={noUsers || 0} route='/users/' />
-            <AnalyticsCard title='Products' value={noProducts} route='/products/' />
-            <AnalyticsCard title='Orders' value={noOrders || 0} route='/orders/' />
+            <AnalyticsCard
+              title='Users'
+              value={noUsers || 0}
+              route='/users/'
+            />
+            <AnalyticsCard
+              title='Products'
+              value={noProducts || 0}
+              route='/products/'
+            />
+            <AnalyticsCard
+              title='Orders'
+              value={noOrders || 0}
+              route='/orders/'
+            />
           </div>
         </div>
         <div>footer</div>

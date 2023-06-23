@@ -141,3 +141,11 @@ button {
   display: flex;
   flex-direction: column;
 }
+
+.products-container {
+  background-color: white;
+  color: #000000;
+  padding: 4rem;
+  margin-top: 5rem;
+  border-radius: 10px;
+}

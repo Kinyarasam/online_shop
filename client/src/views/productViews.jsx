@@ -5,10 +5,9 @@ const ProductsViews = () => {
   const token = localStorage.getItem('token');
   const [products, setProducts] = useState([]);
 
-  console.log(token)
   useEffect(() => {
     const getProducts = async () => {
-      const response = await fetch('http://localhost:5000/users', {
+      const response = await fetch('http://localhost:5000/products', {
         method: 'GET',
         headers: {
           'X-Token': token,
@@ -16,8 +15,7 @@ const ProductsViews = () => {
       });
 
       const data = await response.json();
-      console.log(data);
-      // setProducts(data);
+      setProducts(data);
     };
 
     getProducts();
@@ -27,8 +25,7 @@ const ProductsViews = () => {
     <div className="App">
       <NavBar />
       <div className="products-container">
-        <h3>Users</h3>
-        
+        <h3>Products</h3>
         <div>
           <table>
             <thead>
