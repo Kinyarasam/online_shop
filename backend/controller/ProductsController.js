@@ -10,6 +10,12 @@ const productQueue = new Queue(
 );
 
 export default class ProductsController {
+  /**
+   * Create a new product.
+   * @param {*} req 
+   * @param {*} res 
+   * @returns 
+   */
   static async postNew(req, res) {
     /* Get the current authenticated user */
     const token = req.header('X-Token');
@@ -113,6 +119,47 @@ export default class ProductsController {
             product_type: doc.product_type,
           })));
         })
+    });
+  }
+
+  /**
+   * Retrieves a file from the database.
+   * @param {*} req 
+   * @param {*} res 
+   * @returns {Object} The file from the database
+   */
+  static async getShow(req, res) {
+    const token = req.header('X-Token');
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    const key = `auth_${token}`;
+    const userId = await redisClient.get(key);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const users = dbClient.db.collection('users');
+    const idObject = new ObjectID(userId);
+    return users.findOne({ _id: idObject }, (err, user) => {
+      if (err) return res.status(500).json({ error: err });
+
+      if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+      const { id } = req.params
+      if (!id) return res.status(404).json({ error: 'Not Found' });
+
+      const idObject = new ObjectID(id);
+      const products = dbClient.db.collection('products');
+      return products.findOne({ _id: idObject }, (err, product) => {
+        if (err) return res.status(500).json({ error: err });
+
+        if(!product) return res.status(404).json({ error: 'Not found' });
+
+        return res.status(200).json({
+          id: product._id,
+          name: product.name,
+          title: product.title,
+          product_vendor: product.product_type,
+        });
+      });
     });
   }
 }

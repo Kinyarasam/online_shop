@@ -5,6 +5,7 @@ import UsersController from '../controller/UsersController';
 import AuthController from '../controller/AuthController';
 import FilesController from '../controller/FilesController';
 import ProductsController from '../controller/ProductsController';
+import CustomersController from '../controller/CustomersController';
 
 const router = express.Router();
 
@@ -28,14 +29,21 @@ router.get('/files/:id', FilesController.getShow);
 
 /* publish and unpublish files */
 router
-    .put('/files/:id/publish', FilesController.putPublish)
-    .put('/files/:id/unpublish', FilesController.putUnpublish);
+  .put('/files/:id/publish', FilesController.putPublish)
+  .put('/files/:id/unpublish', FilesController.putUnpublish);
 
 /* file data */
 router.get('/files/:id/data', FilesController.getFile);
 
 /* Create a new product */
-router.post('/products', ProductsController.postNew)
-    .get('/products', ProductsController.getIndex);
+router
+  .get('/products', ProductsController.getIndex)
+  .get('/products/:id', ProductsController.getShow)
+  .post('/products', ProductsController.postNew);
+
+/* Customers */
+router
+  .get('/customers', CustomersController.getIndex)
+  .post('/new_customer', CustomersController.postNew)
 
 export default router;
